@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-server-blue
+  template:
+    metadata:
+      labels:
+        app: web-server-blue
+    spec:
+      volumes:
+      - name: apache-config-volume-blue
+        hostPath:
+          path: /home/docker/apache-config-blue
+      containers:
+      - name: web-server-blue
+        image: httpd
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /usr/local/apache2/htdocs
+          name: apache-config-volume-blue
+        readinessProbe:
+          exec:
+            command:
+            - cat
+            - /usr/local/apache2/htdocs/ready
+          initialDelaySeconds: 5 
+          periodSeconds: 20

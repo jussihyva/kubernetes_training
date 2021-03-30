@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubuntu-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubuntu-server
+  template:
+    metadata:
+      labels:
+        app: ubuntu-server
+    spec:
+      volumes:
+      - name: apache-config-volume-blue
+        hostPath:
+          path: /home/docker/apache-config-blue
+      - name: apache-config-volume-green
+        hostPath:
+          path: /home/docker/apache-config-green
+      containers:
+      - name: ubuntu
+        image: ubuntu
+        volumeMounts:
+        - mountPath: /apache-volume-blue
+          name: apache-config-volume-blue
+        - mountPath: /apache-volume-green
+          name: apache-config-volume-green
+        command: ["/bin/sh", "-c",
+            "echo \"Welcome to BLUE Apache2!\" >/apache-volume-blue/index.html ;
+            echo \"Welcome to GREEN Apache2!\" >/apache-volume-green/index.html ;
+            touch /apache-volume-blue/healthy ;
+            touch /apache-volume-green/healthy ;
+            sleep 60 ;
+            touch /apache-volume-blue/ready ;
+            touch /apache-volume-green/ready ;
+            sleep 300 ;
+            rm -f /apache-volume-blue/healthy ;
+            rm -f /apache-volume-green/healthy ;
+            tail -f /dev/null"]
